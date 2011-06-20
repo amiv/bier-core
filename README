@@ -1,0 +1,7 @@
+# bierdev-core
+
+Enthält alle Bestandteile für die Kernfunktion des Bierautomaten:
+
+* Steuerung des Automaten
+* Framework für Plugins
+* Standard-Ausgabe für Bildschirm
