@@ -5,6 +5,7 @@
 - Enables Free Beer
 """
 import serial
+import time
 
 class LegiReader:
     """Constructor, establishes a connection with the given parameters
@@ -20,7 +21,7 @@ class LegiReader:
     def __del__(self):
         self.ser.close()
         
-    """Returns a tuple holding a legi-id (or None if Button pressed) and the Button which was pressed (or None if Legi read)
+    """Returns a tuple holding a legi-id (or False if Button pressed) and the Button which was pressed (or False if Legi read)
 
     :returns: (legi,button)
     (c) by Stephan Mueller"""
@@ -36,14 +37,32 @@ class LegiReader:
             
             if b == 'l':
                 b = self.ser.read(6)
-                return (int(b),None)
+                return (int(b),False)
             elif b == 'c':
                 b = self.ser.read(1)
-                return (None,int(b))
+                return (False,int(b))
 
         except ValueError as e:
             print "Not a Legi or Button which was pressed. This was read: %s"%(b)
             raise e
+        
+        
+    legiNow = True
+    """Demo-Funktion, will simulate a 'random' legi every 5 seconds, and a button 1 second later
+    Returns a tuple holding a legi-id (or False if Button pressed) and the Button which was pressed (or False if Legi read)
+
+    :returns: (legi,button)"""
+    def getLegiOrButtonFake(self):
+        if (self.legiNow):
+            print "Fake LegiReader: waiting 5 seconds until Legi 013579 will be read"
+            self.legiNow = False
+            time.sleep(5)
+            return (int('013579'),False)
+        else:
+            print "Fake LegiReader: waiting 1 second until button 1 is pressed"
+            self.legiNow = True
+            time.sleep(1)
+            return (False,int('1'))
         
     def setFreeBeer(self,slots=(True,True,False,False)):
         """Sets the Jumper so that a free beer can be released
@@ -71,3 +90,5 @@ class LegiReader:
         led = 'FFFF'
         out = '@s'+str(jumper[0])+str(jumper[1])+str(jumper[2])+str(jumper[3])+led+str(0)
         self.ser.write( out+'\r' )
+        
+        print "Activated free beers"
