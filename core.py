@@ -117,7 +117,7 @@ if __name__ == "__main__":
         while 1:
             #Wait for new Legi or Button, read it
             print "Waiting for User Input (reading a Legi)"
-            (legi,button) = lr.getLegiOrButtonFake()
+            (legi,button) = lr.getLegiOrButton()
             
             print "Detected User Input - Legi=%s, Button=%s"%(legi,button)
             
