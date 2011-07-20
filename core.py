@@ -8,50 +8,70 @@ import MySQLdb as mdb
 import ConfigParser
 import datetime as dt
 import legireader
+import amivid
 
 def amivAuth(rfid):
-    #Connect to amivid and get user object
+    """Checks if the user may get a beer sponsored by AMIV
+    :param rfid: Legi-Code of user
+    :returns: tuple (user,bool) where the first value says returns the user-login (or None) and the second if he may get a beer
+    """
+    #Get secret key
+    config = ConfigParser.RawConfigParser()
+    config.readfp(open('core.conf'))
     
-    #Use login-name to check if he may get a beer (query amivid)
+    #Connect to amivid and get user object
+    aid = amivid.AmivID(apikey=config.get("amivid", "apikey"),secretkey=config.get("amivid", "secretkey"),baseurl=config.get("amivid", "baseurl"))
+    user = aid.getUser(rfid)
+    if not user:
+        return(None,False)
+    login = aid.getUser(rfid)['nethz']
+    
+    #Use login-name to check if he may get a beer 
+    beer = aid.getBeer(login)
     
     #return result, first bool says if user was found, second if he may get a beer)
-    
-    return (True,True)
+    return (login,int(beer['beer']) > 0)
     
 def visAuth(rfid):
-    return (False,False)
+    return (None,False)
     
 
 def __getAuthorization(rfid):
     """Here later the real auth must be done, returning None, "AMIV", "VIS" or "MONEY" (or whatever)
     
     :param rfid: Integer holding the Legi-Card-Number
-    :returns: Tuple of Username and auth. organization (can be 'noBeer') or 'notRegistered' if not registered
+    :returns: Tuple of Username and auth. organization (can be 'noBeer') or (None,'notRegistered') if not registered
     """
     returnString = 'notRegistered'
+    returnUser = None
     #Ask AMIV for auth
-    if amivAuth(rfid)[0]:
-        if amivAuth(rfid)[1]:
-            return 'amiv'
+    aA = amivAuth(rfid)
+    if aA[0]:
+        if aA[1]:
+            return (aA[0],'amiv')
         else:
+            returnUser = aA[0]
             returnString = 'noBeer'
     #Ask VIS if not true from AMIV
-    elif visAuth(rfid)[0]:
-        if visAuth(rfid)[1]:
-            return 'vis'
+    vA = visAuth(rfid)
+    if vA[0]:
+        if vA[1]:
+            return (vA[0],'vis')
         else:
+            returnUser = vA[0]
             returnString = 'noBeer'
 
-    return returnString
+    return (returnUser,returnString)
     
 
-def showCoreMessage(page, code=None, sponsor=None):
+def showCoreMessage(page, code=None, sponsor=None, user=None):
     """Displays a HTML-page on the Display in the core-part, showing the basic info if a legi was accepted"""
     if page == 'authorized':
+        
         print "Authorized by %s, press the button!"%(sponsor)
         
     if page == 'notAuthorized':
-        print "Not authorized, legi was: %s"%(code)
+        print "Not authorized, user was: %s"%(user)
         
     if page == 'notRegistered':
         print "Not registered, legi was: %s"%(code)
@@ -74,6 +94,7 @@ if __name__ == "__main__":
     dbuser = config.get("mysql", "user")
     dbpass = config.get("mysql", "pass")
     dbdatabase = config.get("mysql", "db")
+    dbtable = config.get("mysql", "table")
     dbhost = config.get("mysql", "host")
     
     print "ConfigFile core.conf read"
@@ -96,7 +117,7 @@ if __name__ == "__main__":
         while 1:
             #Wait for new Legi or Button, read it
             print "Waiting for User Input (reading a Legi)"
-            (legi,button) = lr.getLegiOrButton()
+            (legi,button) = lr.getLegiOrButtonFake()
             
             print "Detected User Input - Legi=%s, Button=%s"%(legi,button)
             
@@ -104,27 +125,28 @@ if __name__ == "__main__":
             if legi:
                 authorize = __getAuthorization(legi)
     
-                if authorize == 'amiv' or authorize == 'vis':
-                    showCoreMessage('authorized',sponsor=authorize)
+                if authorize[1] == 'amiv' or authorize[1] == 'vis':
+                    showCoreMessage('authorized',sponsor=authorize[1])
                     lastUserTime = dt.datetime.now()
-                    lastUser = legi
-                elif authorize == 'noBeer':
-                    showCoreMessage('notAuthorized',code=legi)
-                elif authorize == 'notRegistered':
+                    lastUser = authorize[0]
+                    #Activate free beer
+                    lr.setFreeBeer()
+                elif authorize[1] == 'noBeer':
+                    showCoreMessage('notAuthorized',user=authorize[0])
+                elif authorize[1] == 'notRegistered':
                     showCoreMessage('notRegistered',code=legi)
                 else:
                     print >>sys.stderr, "Authorization failed"
 
             elif button and authorize:
                 #A Button was pressed, check if a legi was read in the last two seconds
-                if (dt.datetime.now()-lastUserTime < dt.timedelta(seconds=2)):
-                    #Activate free beer
-                    lr.setFreeBeer()
+                if (dt.datetime.now()-lastUserTime < dt.timedelta(seconds=5)):
                     #Show that a free beer was server
-                    showCoreMessage('freeBeer',sponsor=authorize)
+                    showCoreMessage('freeBeer',sponsor=authorize[1])
                     #Log it
-                    cursor.execute("INSERT INTO bierlog(username, org, time, slot) VALUES (%s,%s,NOW(),%s)",
-                                   (lastUser,authorize, button))
+                    queryString = "INSERT INTO %s(username, org, time, slot) VALUES (%%s,%%s,NOW(),%%s)"%(dbtable)
+                    cursor.execute(queryString,
+                                   (lastUser,authorize[1], button))
                     #Un-Authorize user
                     authorize = None
                     

@@ -27,20 +27,21 @@ class LegiReader:
     (c) by Stephan Mueller"""
     def getLegiOrButton(self):
         try:
-            b = ''
-            # wait for start byte
-            while b == '' or b != '@':
+            while 1:
+                b = ''
+                # wait for start byte
+                while b == '' or b != '@':
+                    b = self.ser.read(1)
+     
+                #First Byte says if it is a legi (l) or a button (c) which was pressed 
                 b = self.ser.read(1)
- 
-            #First Byte says if it is a legi (l) or a button (c) which was pressed 
-            b = self.ser.read(1)
-            
-            if b == 'l':
-                b = self.ser.read(6)
-                return (int(b),False)
-            elif b == 'c':
-                b = self.ser.read(1)
-                return (False,int(b))
+                
+                if b == 'l':
+                    b = self.ser.read(6)
+                    return (int(b),False)
+                elif b == 'c':
+                    b = self.ser.read(1)
+                    return (False,int(b))
 
         except ValueError as e:
             print "Not a Legi or Button which was pressed. This was read: %s"%(b)
@@ -91,4 +92,4 @@ class LegiReader:
         out = '@s'+str(jumper[0])+str(jumper[1])+str(jumper[2])+str(jumper[3])+led+str(0)
         self.ser.write( out+'\r' )
         
-        print "Activated free beers"
+        print "Activated FreeBeers, now the button must be pressed in 5 seconds"
