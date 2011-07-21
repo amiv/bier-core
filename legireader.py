@@ -55,10 +55,10 @@ class LegiReader:
     :returns: (legi,button)"""
     def getLegiOrButtonFake(self):
         if (self.legiNow):
-            print "Fake LegiReader: waiting 5 seconds until Legi 013579 will be read"
+            print "Fake LegiReader: waiting 5 seconds until Legi 013579/034617 will be read"
             self.legiNow = False
             time.sleep(5)
-            return (int('013579'),False)
+            return (int('034617'),False)
         else:
             print "Fake LegiReader: waiting 1 second until button 1 is pressed"
             self.legiNow = True
@@ -92,4 +92,4 @@ class LegiReader:
         out = '@s'+str(jumper[0])+str(jumper[1])+str(jumper[2])+str(jumper[3])+led+str(0)
         self.ser.write( out+'\r' )
         
-        print "Activated FreeBeers, now the button must be pressed in 5 seconds"
+        #print "Activated FreeBeers, now the button must be pressed in 5 seconds"

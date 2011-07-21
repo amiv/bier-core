@@ -25,10 +25,12 @@ def amivAuth(rfid):
     user = aid.getUser(rfid)
     if not user:
         return(None,False)
-    login = aid.getUser(rfid)['nethz']
+    login = user['nethz']
     
     #Use login-name to check if he may get a beer 
-    beer = aid.getBeer(login)
+    #Old: API-Query beer = aid.getBeer(login)
+    #New: Take it from the user object
+    beer = user['apps']
     
     #return result, first bool says if user was found, second if he may get a beer)
     return (login,int(beer['beer']) > 0)
@@ -42,12 +44,12 @@ def visAuth(rfid):
     #config = ConfigParser.RawConfigParser()
     #config.readfp(open('core.conf'))
     
-    #Connect to amivid and get user object
+    #Connect to visid and get user object
     vid = visid.VisID(baseurl=config.get("visid", "baseurl"))
     user = vid.getUser(rfid)
     if not user:
         return(None,False)
-    login = vid.getUser(rfid)['nethz']
+    login = user['nethz']
     
     #Use login-name to check if he may get a beer 
     beer = vid.getBeer(login)
@@ -88,7 +90,7 @@ def showCoreMessage(page, code=None, sponsor=None, user=None):
     """Displays a HTML-page on the Display in the core-part, showing the basic info if a legi was accepted"""
     if page == 'authorized':
         
-        print "Authorized by %s, press the button!"%(sponsor)
+        print "%s authorized by %s, press the button!"%(user,sponsor)
         
     if page == 'notAuthorized':
         print "Not authorized, user was: %s"%(user)
@@ -97,7 +99,7 @@ def showCoreMessage(page, code=None, sponsor=None, user=None):
         print "Not registered, legi was: %s"%(code)
         
     if page == 'freeBeer':
-        print "You got your free beer, sponsored by %s"%(sponsor)
+        print "%s got a free beer, sponsored by %s"%(user,sponsor)
 
 def startApp(appname):
     """Starts a custom app"""
@@ -105,7 +107,7 @@ def startApp(appname):
         
 
 if __name__ == "__main__":
-    debug = True
+    debug = False
     
     #Load Config Parameters
     config = ConfigParser.RawConfigParser()
@@ -136,20 +138,20 @@ if __name__ == "__main__":
     try:
         while 1:
             #Wait for new Legi or Button, read it
-            print "Waiting for User Input (reading a Legi)"
+            #print "Waiting for User Input (reading a Legi)"
             (legi,button) = lr.getLegiOrButton()
             
-            print "Detected User Input - Legi=%s, Button=%s"%(legi,button)
+            #print "Detected User Input - Legi=%s, Button=%s"%(legi,button)
             
             #check if legi may get a beer
             if legi:
                 #For debug: Time the auth-query
-                starttime = dt.datetime.now()
+                #starttime = dt.datetime.now()
                 authorize = __getAuthorization(legi)
-                print "Auth-Time: %s"%(dt.datetime.now()-starttime)
+                #print "Auth-Time: %s"%(dt.datetime.now()-starttime)
     
                 if authorize[1] == 'amiv' or authorize[1] == 'vis':
-                    showCoreMessage('authorized',sponsor=authorize[1])
+                    showCoreMessage('authorized',sponsor=authorize[1],user=authorize[0])
                     lastUserTime = dt.datetime.now()
                     lastUser = authorize[0]
                     #Activate free beer
@@ -165,7 +167,7 @@ if __name__ == "__main__":
                 #A Button was pressed, check if a legi was read in the last two seconds
                 if (dt.datetime.now()-lastUserTime < dt.timedelta(seconds=5)):
                     #Show that a free beer was server
-                    showCoreMessage('freeBeer',sponsor=authorize[1])
+                    showCoreMessage('freeBeer',sponsor=authorize[1],user=authorize[0])
                     #Log it
                     queryString = "INSERT INTO %s(username, org, time, slot) VALUES (%%s,%%s,NOW(),%%s)"%(dbtable)
                     cursor.execute(queryString,

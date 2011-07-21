@@ -14,7 +14,7 @@ import sys
 
 class VisID:
     
-    def __init__(self,apikey=None,secretkey=None,baseurl):
+    def __init__(self,baseurl,apikey=None,secretkey=None):
         """Prepares a connection to VisID
         
         :param apikey: Shared Secret string
@@ -45,15 +45,17 @@ class VisID:
         :returns: dict with user-infos
         """
         #Create request
-        #request = [('apikey', self.apikey),
-        #           ('token', int(datetime.datetime.now().strftime("%s"))),
-        #           ('type', 'rfid')]
+        request = [('format', 'json')]
         
         #Add query & signature
-        finalRequest = "rfid/%s"%(rfid)
+        finalRequest = "rfid/%06d?%s"%(rfid,urllib.urlencode(request))
         
-        userDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
-        return userDict
+        try:
+            userDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
+            return userDict
+        except simplejson.decoder.JSONDecodeError:
+            return None
+            
     
     def getBeer(self,username):
         """Gets the Infos if a user may get a beer (and how many)
@@ -61,11 +63,13 @@ class VisID:
         :param username: n.ethz or amiv.ethz.ch username
         :returns: True if he gets a beer, False otherwise
         """
-        #request = [('apikey', self.apikey),
-        #           ('token', int(datetime.datetime.now().strftime("%s")))]
+        #Create request
+        request = [('format', 'json')]
         
         #Add query & signature
-        finalRequest = "status/%s"%(username)
-        
-        beerDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
-        return beerDict
+        finalRequest = "status/%s?%s"%(username,urllib.urlencode(request))
+        try:
+            beerDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
+            return beerDict
+        except simplejson.decoder.JSONDecodeError:
+            return None
