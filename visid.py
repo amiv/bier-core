@@ -12,10 +12,10 @@ import simplejson
 from operator import itemgetter
 import sys
 
-class AmivID:
+class VisID:
     
-    def __init__(self,apikey,secretkey,baseurl):
-        """Prepares a connection to AmivID
+    def __init__(self,apikey=None,secretkey=None,baseurl):
+        """Prepares a connection to VisID
         
         :param apikey: Shared Secret string
         :param baseurl: Optional, the URL of the REST service
@@ -45,12 +45,12 @@ class AmivID:
         :returns: dict with user-infos
         """
         #Create request
-        request = [('apikey', self.apikey),
-                   ('token', int(datetime.datetime.now().strftime("%s"))),
-                   ('type', 'rfid')]
+        #request = [('apikey', self.apikey),
+        #           ('token', int(datetime.datetime.now().strftime("%s"))),
+        #           ('type', 'rfid')]
         
         #Add query & signature
-        finalRequest = self.__sign("%06d"%(rfid),request)
+        finalRequest = "rfid/%s"%(rfid)
         
         userDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
         return userDict
@@ -61,11 +61,11 @@ class AmivID:
         :param username: n.ethz or amiv.ethz.ch username
         :returns: True if he gets a beer, False otherwise
         """
-        request = [('apikey', self.apikey),
-                   ('token', int(datetime.datetime.now().strftime("%s")))]
+        #request = [('apikey', self.apikey),
+        #           ('token', int(datetime.datetime.now().strftime("%s")))]
         
         #Add query & signature
-        finalRequest = self.__sign("%s/apps"%(username),request)
+        finalRequest = "status/%s"%(username)
         
         beerDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
         return beerDict

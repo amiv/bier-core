@@ -9,6 +9,7 @@ import ConfigParser
 import datetime as dt
 import legireader
 import amivid
+import visid
 
 def amivAuth(rfid):
     """Checks if the user may get a beer sponsored by AMIV
@@ -33,7 +34,26 @@ def amivAuth(rfid):
     return (login,int(beer['beer']) > 0)
     
 def visAuth(rfid):
-    return (None,False)
+    """Checks if the user may get a beer sponsored by AMIV
+    :param rfid: Legi-Code of user
+    :returns: tuple (user,bool) where the first value says returns the user-login (or None) and the second if he may get a beer
+    """
+    #Get secret key
+    #config = ConfigParser.RawConfigParser()
+    #config.readfp(open('core.conf'))
+    
+    #Connect to amivid and get user object
+    vid = visid.VisID(baseurl=config.get("visid", "baseurl"))
+    user = vid.getUser(rfid)
+    if not user:
+        return(None,False)
+    login = vid.getUser(rfid)['nethz']
+    
+    #Use login-name to check if he may get a beer 
+    beer = vid.getBeer(login)
+    
+    #return result, first bool says if user was found, second if he may get a beer)
+    return (login,int(beer['beer']) > 0)
     
 
 def __getAuthorization(rfid):
@@ -123,10 +143,10 @@ if __name__ == "__main__":
             
             #check if legi may get a beer
             if legi:
-                #DEBUG
-                #lr.setFreeBeer()
-
+                #For debug: Time the auth-query
+                starttime = dt.datetime.now()
                 authorize = __getAuthorization(legi)
+                print "Auth-Time: %s"%(dt.datetime.now()-starttime)
     
                 if authorize[1] == 'amiv' or authorize[1] == 'vis':
                     showCoreMessage('authorized',sponsor=authorize[1])
