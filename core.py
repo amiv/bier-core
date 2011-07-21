@@ -123,6 +123,9 @@ if __name__ == "__main__":
             
             #check if legi may get a beer
             if legi:
+                #DEBUG
+                #lr.setFreeBeer()
+
                 authorize = __getAuthorization(legi)
     
                 if authorize[1] == 'amiv' or authorize[1] == 'vis':
