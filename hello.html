@@ -1,7 +1,7 @@
 <!doctype html>
 <title>Are you getting a beer?</title>
-{% if name %}
-  <h1>{{ name }}!</h1>
-{% else %}
-  <h1>Invalid call</h1>
-{% endif %}
+<script type=text/javascript src="{{
+  url_for('static', filename='jquery.js') }}"></script>
+<script type=text/javascript>
+$.post("_checkLegi", { getBeer: 2 } );
+</script>
