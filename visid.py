@@ -53,7 +53,7 @@ class VisID:
         try:
             userDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
             return userDict
-        except simplejson.decoder.JSONDecodeError:
+        except ValueError as e:
             return None
             
     
@@ -71,5 +71,5 @@ class VisID:
         try:
             beerDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
             return beerDict
-        except simplejson.decoder.JSONDecodeError:
+        except ValueError:
             return None

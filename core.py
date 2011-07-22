@@ -10,16 +10,13 @@ import datetime as dt
 import legireader
 import amivid
 import visid
+import os.path
 
 def amivAuth(rfid):
     """Checks if the user may get a beer sponsored by AMIV
     :param rfid: Legi-Code of user
     :returns: tuple (user,bool) where the first value says returns the user-login (or None) and the second if he may get a beer
     """
-    #Get secret key
-    config = ConfigParser.RawConfigParser()
-    config.readfp(open('core.conf'))
-    
     #Connect to amivid and get user object
     aid = amivid.AmivID(apikey=config.get("amivid", "apikey"),secretkey=config.get("amivid", "secretkey"),baseurl=config.get("amivid", "baseurl"))
     user = aid.getUser(rfid)
@@ -111,7 +108,7 @@ if __name__ == "__main__":
     
     #Load Config Parameters
     config = ConfigParser.RawConfigParser()
-    config.readfp(open('core.conf'))
+    config.readfp(open(os.path.dirname(__file__) + '/core.conf')) #changed this as well because not right directory otherwise (Fadri)
     
     dbuser = config.get("mysql", "user")
     dbpass = config.get("mysql", "pass")
