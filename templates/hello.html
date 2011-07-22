@@ -1,7 +1,10 @@
 <!doctype html>
-<title>Hello from Flask</title>
-{% if name %}
-  <h1>Hello {{ name }}!</h1>
-{% else %}
-  <h1>Hello World!</h1>
-{% endif %}
+<title>Are you getting a beer?</title>
+<script type=text/javascript src="{{
+  url_for('static', filename='jquery.js') }}"></script>
+<body>
+<script type=text/javascript>
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+$.post($SCRIPT_ROOT +"/_checkLegi", { getBeer: "2" } );
+</script>
+</body>
