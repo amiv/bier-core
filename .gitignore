@@ -1,1 +1,2 @@
-core.conf
+*.conf
+*.pyc

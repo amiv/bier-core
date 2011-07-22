@@ -11,6 +11,9 @@ import legireader
 import amivid
 import visid
 import os.path
+import urllib
+
+debug = True
 
 def amivAuth(rfid):
     """Checks if the user may get a beer sponsored by AMIV
@@ -30,6 +33,7 @@ def amivAuth(rfid):
     beer = user['apps']
     
     #return result, first bool says if user was found, second if he may get a beer)
+    if (debug): print "Debug: Beer-Count %s"%(beer['beer'])
     return (login,int(beer['beer']) > 0)
     
 def visAuth(rfid):
@@ -83,10 +87,23 @@ def __getAuthorization(rfid):
     return (returnUser,returnString)
     
 
+def sendToScreen(var, value):
+    """Sends a value using POST to the local (flask) server, used to communicate with the GUI"""
+    serverUrl = "http://localhost:5000/_checkLegi"
+    request = {var: value}
+    try:
+        reply = urllib.urlopen(serverUrl+"?"+urllib.urlencode(request)).read()
+    except IOError:
+        print "Could not connect to local webserver"
+        return
+    if (debug): print "sendToScreen with %s: %s, reply was %s"%(var,value,reply)
+
+
 def showCoreMessage(page, code=None, sponsor=None, user=None):
     """Displays a HTML-page on the Display in the core-part, showing the basic info if a legi was accepted"""
     if page == 'authorized':
-        
+        #Template for sending the info to the display
+        #sendToScreen('beerState','authorized')        
         print "%s authorized by %s, press the button!"%(user,sponsor)
         
     if page == 'notAuthorized':
@@ -104,7 +121,7 @@ def startApp(appname):
         
 
 if __name__ == "__main__":
-    debug = False
+    debug = True
     
     #Load Config Parameters
     config = ConfigParser.RawConfigParser()

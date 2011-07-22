@@ -58,7 +58,7 @@ class LegiReader:
             print "Fake LegiReader: waiting 5 seconds until Legi 013579/034617 will be read"
             self.legiNow = False
             time.sleep(5)
-            return (int('034617'),False)
+            return (int('013579'),False)
         else:
             print "Fake LegiReader: waiting 1 second until button 1 is pressed"
             self.legiNow = True
@@ -88,7 +88,12 @@ class LegiReader:
             jumper[1] += 2
         
         #Activate LEDs, send Jumpers to Automat
-        led = 'FFFF'
+        led = ''
+        for slot in slots:
+            if slot:
+                led += 'F'
+            else:
+                led += '0'
         out = '@s'+str(jumper[0])+str(jumper[1])+str(jumper[2])+str(jumper[3])+led+str(0)
         self.ser.write( out+'\r' )
         

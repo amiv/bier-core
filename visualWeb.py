@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from flask import Flask, jsonify, render_template, request
 import sys
 
@@ -28,7 +29,7 @@ def hello():
 def checkLegi():
 
     global getBeer
-    getBeer = request.form.get('getBeer', 0, type=int)
+    getBeer = request.args.get('getBeer', 0, type=int)
     print >>sys.stderr,getBeer
     return ""
 

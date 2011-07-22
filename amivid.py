@@ -52,7 +52,10 @@ class AmivID:
         #Add query & signature
         finalRequest = self.__sign("%06d"%(rfid),request)
         
-        userDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
+        try:
+            userDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
+        except ValueError as e:
+            print "Error in amivID.getUser(), %s"%(e)
         return userDict
     
     def getBeer(self,username):
@@ -67,5 +70,8 @@ class AmivID:
         #Add query & signature
         finalRequest = self.__sign("%s/apps"%(username),request)
         
-        beerDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
+        try:
+            beerDict = simplejson.load(urllib.urlopen(self.baseurl+finalRequest))
+        except ValueError as e:
+            print "Error in amivID.getBeer(), %s"%(e)
         return beerDict
