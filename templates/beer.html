@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+<title>Bierautomat 2.0: Frontend Prototype</title>
+
+<script type=text/javascript src="{{
+  url_for('static', filename='jquery.js') }}"></script>
+<script type=text/javascript>
+setInterval( "updateLegi();", 500 ); 
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  $(function() { 
+    updateLegi = function(){
+      $.getJSON($SCRIPT_ROOT + '/_updateLegi', {
+        blub: 5
+        //whatever you wanna pass
+      }, function(data) {
+        $("#beerDiv").text(data.result);
+      });
+      return false;
+    }
+  });
+</script>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+html, body {
+	padding:0;
+	margin:0;
+	overflow:hidden;
+}
+body > div {
+	position:fixed;
+	top:10px;
+	left:10px;
+}
+body > div > button {
+	display:block;
+	width: 150px;
+}
+body > section {
+	width:100%;
+	background:lightblue;
+	height:25%;
+	text-align:center;
+	padding: 0.5em 0;
+	-moz-box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+}
+#default {}
+#legiok {}
+#nobeer {background-color:red;}
+#nolegi {}
+body > section > p.noshow {
+	display:none;
+}
+body > section + section {
+	background:white;
+	height:75%;
+	text-align:center;
+}
+body > section + section ul {
+	width:900px;
+	margin: 0 auto;
+}
+body > section + section ul li {
+	width:280px;
+	float:left;
+	border: 1px solid #999;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	margin: 9px;
+	height:280px;
+	background-image: -moz-radial-gradient(#555, #999);
+	background-image: -webkit-radial-gradient(#555, #999);
+}
+body > section + section ul li:hover {
+	background-image: -moz-radial-gradient(#999, #ccc);
+	background-image: -webkit-radial-gradient(#999, #ccc);
+}
+</style>
+</head>
+<body>
+
+<div id="control">
+<button id="reset"
+	onclick="document.getElementById('default').className='';
+			 document.getElementById('legiok').className='noshow';
+			 document.getElementById('nobeer').className='noshow';
+			 document.getElementById('nolegi').className='noshow';
+			 document.getElementsByTagName('section')[0].style.cssText = 'background-color:lightblue;'
+			 return false;">Reset Statemachine</button>
+<button id="legiokbeerok"
+	onclick="document.getElementById('default').className='noshow';
+			 document.getElementById('legiok').className='';
+			 document.getElementById('nobeer').className='noshow';
+			 document.getElementById('nolegi').className='noshow';
+			 document.getElementsByTagName('section')[0].style.cssText = 'background-color:lightgreen;'
+			 return false;">Legi OK, Bierbezug möglich</button>
+<button id="legioknobeer"
+	onclick="document.getElementById('default').className='noshow';
+			 document.getElementById('legiok').className='noshow';
+			 document.getElementById('nobeer').className='';
+			 document.getElementById('nolegi').className='noshow';
+			 document.getElementsByTagName('section')[0].style.cssText = 'background-color:red;'
+			 return false;">Legi OK, kein Bierbezug möglich</button>
+
+<button id="legioknobeer"
+	onclick="document.getElementById('default').className='noshow';
+			 document.getElementById('legiok').className='noshow';
+			 document.getElementById('nobeer').className='noshow';
+			 document.getElementById('nolegi').className='';
+			 document.getElementsByTagName('section')[0].style.cssText = 'background-color:pink;'
+			 return false;">Legi nicht registriert</button>
+</div>
+
+<section>
+<h1>AMIV Bierautomat 2.0</h1>
+<p id="legiok">
+	<b>Status:</b> Du hast noch ein Freibier!<br/>
+	Bitte Knopf drücken.
+</p>
+<p id="nobeer" class="noshow">
+
+	<b>Status:</b> Leider schon gebraucht!<br/>
+	Musst du halt bis morgen warten... ;-)
+</p>
+<p id="nolegi" class="noshow">
+	<b>Status:</b> Deine Legi ist leider nicht registriert!<br/>
+	Die Registrierung kannst du gleich selbst vornehmen.
+</p>
+
+<p id="default" class="noshow">
+	<b>Status:</b> Es ist alles OK!<br/>
+	Für Bierbezug bitte die Legi an den Leser halten.
+</p>
+<div id="beerDiv"><h2></h2></div>
+</section>
+
+<section>
+<ul>
+	<li>App 1</li>
+	<li>App 2</li>
+
+	<li>App 3</li>
+	<li>App 4</li>
+	<li>App 5</li>
+	<li>App 6</li>
+	<li>App 7</li>
+</ul>
+</section>
+
+<!--{% if beer=='yes' %}-->
+<!--  <h1>Yes getting a beer ! Congrats!</h1>-->
+<!--{% elif beer=='no' %}-->
+<!--  <h1>No beer for you! Sorry!</h1>-->
+<!--{% else %}-->
+<!--  <h1>Invalid call</h1>-->
+<!--{% endif %}-->
+
+</body>
+</html>
+
+

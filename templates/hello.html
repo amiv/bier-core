@@ -1,0 +1,10 @@
+<!doctype html>
+<title>Are you getting a beer?</title>
+<script type=text/javascript src="{{
+  url_for('static', filename='jquery.js') }}"></script>
+<body>
+<script type=text/javascript>
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+$.post($SCRIPT_ROOT +"/_checkLegi", { getBeer: "2" } );
+</script>
+</body>

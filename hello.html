@@ -1,0 +1,7 @@
+<!doctype html>
+<title>Are you getting a beer?</title>
+<script type=text/javascript src="{{
+  url_for('static', filename='jquery.js') }}"></script>
+<script type=text/javascript>
+$.post("_checkLegi", { getBeer: 2 } );
+</script>
